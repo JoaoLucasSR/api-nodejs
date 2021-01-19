@@ -2,12 +2,25 @@ import express from "express";
 import bodyParser from "body-parser";
 const consign = require('consign');
 
-const app = express();
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
+import { conexao } from "./infraestrutura/conexao";
+import Tabelas from "./infraestrutura/tabelas";
 
-consign({extensions: [ '.js', '.json', '.node', '.ts' ]})
-    .include('controllers')
-    .into(app);
+conexao.connect((error) => {
+    if(error)
+        console.log(error);
+    else {
+        console.log("Database connected");
+        const tabelas = new Tabelas(conexao);
+        const app = express();
+        app.use(bodyParser.urlencoded({extended: true}));
+        app.use(bodyParser.json());
 
-app.listen(3000, () => "Server running in port: 3000");
+        consign({extensions: [ '.js', '.json', '.node', '.ts' ]})
+            .include('controllers')
+            .into(app);
+
+        app.listen(3000, () => console.log("Server running in port: 3000"));
+    }
+});
+
+
